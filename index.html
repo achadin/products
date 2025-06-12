@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 100 Produtos Mais Vendidos</title>
+    
+    <!-- Tailwind CSS para estilização rápida e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter, usado pela Apple e muitas startups de tecnologia -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Aplicando a fonte Inter como padrão */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Animação de fade-in para os cards */
+        .product-card {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+
+        .product-card.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Estilo sutil para a barra de rolagem */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827; /* bg-gray-900 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151; /* bg-gray-700 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563; /* bg-gray-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <!-- Cabeçalho -->
+    <header class="py-8 px-4 sm:px-6 lg:px-8 border-b border-gray-800">
+        <div class="max-w-7xl mx-auto text-center">
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-400">Top 100 Ofertas</h1>
+            <p class="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">Uma seleção dos produtos mais desejados, escolhidos a dedo para você na nossa região.</p>
+        </div>
+    </header>
+
+    <!-- Grade de Produtos -->
+    <main class="py-12 sm:py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+                <!-- Os cards de produtos serão inseridos aqui pelo JavaScript -->
+            </div>
+            <div id="loading-message" class="text-center text-gray-400 text-lg">Carregando produtos...</div>
+        </div>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="py-8 mt-12 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+            <p>&copy; 2024 Sua Marca Aqui. Todos os direitos reservados.</p>
+            <p class="text-sm mt-2">Promovendo as melhores ofertas na sua região.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const productGrid = document.getElementById('product-grid');
+            const loadingMessage = document.getElementById('loading-message');
+
+            // --- LÓGICA PARA CARREGAR PRODUTOS DO ARQUIVO JSON ---
+            async function loadProducts() {
+                try {
+                    // Busca o arquivo products.json no mesmo diretório
+                    const response = await fetch('products.json');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const products = await response.json();
+                    
+                    loadingMessage.style.display = 'none'; // Esconde a mensagem de carregamento
+                    displayProducts(products);
+
+                } catch (error) {
+                    console.error("Erro ao carregar o arquivo de produtos:", error);
+                    loadingMessage.textContent = 'Não foi possível carregar a lista de produtos. Verifique se o arquivo "products.json" existe e está no formato correto.';
+                }
+            }
+
+            // --- LÓGICA PARA EXIBIR OS PRODUTOS NA PÁGINA ---
+            function displayProducts(products) {
+                 if (!productGrid || !Array.isArray(products)) return;
+
+                productGrid.innerHTML = ''; // Limpa a grade antes de adicionar novos itens
+
+                products.forEach((product, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition-all duration-300 ease-in-out border border-gray-700 flex flex-col';
+                    
+                    card.innerHTML = `
+                        <div class="relative group">
+                            <img class="w-full h-56 object-cover" src="${product.imageUrl}" alt="${product.name}" onerror="this.onerror=null;this.src='https://placehold.co/400x400/111827/FFFFFF?text=Imagem+Indispon%C3%ADvel';">
+                            <div class="absolute top-2 left-2 bg-gray-900/50 text-white text-sm font-bold w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-sm">${index + 1}</div>
+                        </div>
+                        <div class="p-5 flex-grow flex flex-col">
+                            <h3 class="text-lg font-semibold text-gray-200 flex-grow">${product.name}</h3>
+                            <a href="${product.affiliateLink}" target="_blank" rel="noopener noreferrer" class="mt-4 block w-full bg-blue-600 text-white text-center font-semibold py-3 rounded-lg hover:bg-blue-500 transition-colors duration-300">
+                                Ver Oferta
+                            </a>
+                        </div>
+                    `;
+                    productGrid.appendChild(card);
+                });
+
+                setupIntersectionObserver();
+            }
+
+            // --- LÓGICA PARA ANIMAÇÃO AO ROLAR A PÁGINA ---
+            function setupIntersectionObserver() {
+                const cards = document.querySelectorAll('.product-card');
+                if (cards.length === 0) return;
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, {
+                    threshold: 0.1 
+                });
+
+                cards.forEach(card => observer.observe(card));
+            }
+
+            // Inicia o processo de carregamento dos produtos
+            loadProducts();
+        });
+    </script>
+
+</body>
+</html>
