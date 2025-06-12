@@ -1,18 +1,17 @@
-# 1. Inicia o Git na sua pasta
-git init
-
-# 2. Adiciona todos os arquivos para serem enviados
-git add .
-
-# 3. Cria um "pacote" de salvamento com uma mensagem descritiva
-git commit -m "Versão inicial do site e gerenciador"
-
-# 4. Define o nome da branch principal como "main"
-git branch -M main
-
-# 5. Conecta sua pasta local ao seu repositório no GitHub
-#    !! IMPORTANTE: Substitua a URL pela URL do seu repositório !!
-git remote add origin https://github.com/seu-usuario/seu-repositorio.git
-
-# 6. Envia os arquivos para o GitHub
-git push -u origin main
+[
+  {
+    "name": "Apple iPhone 15 Pro (128 GB)",
+    "imageUrl": "https://placehold.co/400x400/f5f5f7/000000?text=iPhone+15+Pro",
+    "affiliateLink": "https://SEU_LINK_DE_AFILIADO_AQUI"
+  },
+  {
+    "name": "Amazon Echo Dot 5ª Geração",
+    "imageUrl": "https://placehold.co/400x400/111827/FFFFFF?text=Echo+Dot",
+    "affiliateLink": "https://SEU_LINK_DE_AFILIADO_AQUI"
+  },
+  {
+    "name": "PlayStation 5",
+    "imageUrl": "https://placehold.co/400x400/0070d1/FFFFFF?text=PS5",
+    "affiliateLink": "https://SEU_LINK_DE_AFILIADO_AQUI"
+  }
+]
