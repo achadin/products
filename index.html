@@ -14,8 +14,8 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0c143d; /* Azul escuro do logo - COR UNIFICADA */
-            color: #E6E0F8; /* Lavanda suave para texto */
+            background-color: #0c143d;
+            color: #E6E0F8;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -27,7 +27,7 @@
         .product-card, .testimonial-card {
             opacity: 0;
             transform: translateY(20px);
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
             background-color: #1a224a;
             border: 1px solid #29315c;
             overflow: hidden;
@@ -37,9 +37,26 @@
             opacity: 1;
             transform: translateY(0);
         }
+        
+        /* EFEITO DE BRILHO NOS CARDS */
+        .product-image-container:hover .shine-effect {
+            opacity: 1;
+            transform: scale(1.5) rotate(20deg);
+        }
+        .shine-effect {
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+            transform: scale(0);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
 
         .nav-btn {
-            opacity: 0.5; /* Botões sempre visíveis com uma leve transparência */
+            opacity: 0.6;
             transition: opacity 0.3s ease, transform 0.2s ease;
             background-color: rgba(26, 34, 74, 0.5);
             backdrop-filter: blur(4px);
@@ -48,50 +65,72 @@
         .carousel-container:hover .nav-btn {
             opacity: 1;
         }
-
         .nav-btn:hover {
             transform: translateY(-50%) scale(1.1);
         }
         
         .product-carousel {
             scroll-behavior: smooth;
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         .product-carousel::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, and Opera */
+            display: none;
+        }
+        
+        /* EFEITO DE FADE NAS LATERAIS DO CARROSSEL */
+        .carousel-container {
+            position: relative;
+        }
+        .carousel-container::before, .carousel-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50px;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .carousel-container::before {
+            left: 0;
+            background: linear-gradient(to right, #0c143d, transparent);
+        }
+        .carousel-container::after {
+            right: 0;
+            background: linear-gradient(to left, #0c143d, transparent);
         }
 
-        .testimonial-carousel::-webkit-scrollbar {
-            height: 8px;
-        }
-        .testimonial-carousel::-webkit-scrollbar-track {
-            background: #1a224a;
-            border-radius: 10px;
-        }
-        .testimonial-carousel::-webkit-scrollbar-thumb {
-            background: #4a517a;
-            border-radius: 10px;
-        }
-        .testimonial-carousel::-webkit-scrollbar-thumb:hover {
-            background: #FFD700;
-        }
+        .testimonial-carousel::-webkit-scrollbar { height: 8px; }
+        .testimonial-carousel::-webkit-scrollbar-track { background: #1a224a; border-radius: 10px; }
+        .testimonial-carousel::-webkit-scrollbar-thumb { background: #4a517a; border-radius: 10px; }
+        .testimonial-carousel::-webkit-scrollbar-thumb:hover { background: #FFD700; }
     </style>
 </head>
 <body>
 
     <header class="py-10 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto text-center">
-            <div class="flex flex-col justify-center items-center gap-3 mb-4 group">
+            <div class="flex flex-col justify-center items-center gap-3 mb-10 group">
                 <img src="logo.png" alt="Logo Achadin" class="h-56 w-56 object-cover rounded-full border-4 border-[#29315c] shadow-lg transition-transform duration-300 ease-in-out group-hover:scale-105">
                 <p class="text-xl text-amber-100/70 mt-2">Seu desejo, nosso achado.</p>
             </div>
         </div>
     </header>
+    
+    <!-- BANNER DE DESTAQUE -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+        <div class="relative rounded-xl overflow-hidden bg-cover bg-center h-64 flex items-center justify-center text-center p-4" style="background-image: url('https://images.unsplash.com/photo-1550246140-5119ae4790b8?q=80&w=2070&auto=format&fit=crop');">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0c143d] via-[#0c143d]/70 to-transparent"></div>
+            <div class="relative">
+                <h2 class="text-5xl font-brand font-bold text-white shadow-lg">Os Tesouros da Semana</h2>
+                <p class="text-amber-100/80 mt-2 text-lg">Achados incríveis que acabaram de chegar!</p>
+            </div>
+        </div>
+    </section>
 
     <main class="pb-12 sm:pb-16">
         <div id="category-sections" class="space-y-16">
-            <!-- As seções de categorias serão injetadas aqui pelo JavaScript -->
+            <!-- As seções de categorias serão injetadas aqui -->
         </div>
         <div id="loading-message" class="text-center text-gray-400 text-lg mt-8">Carregando seus achados...</div>
     </main>
@@ -121,11 +160,10 @@
             const loadingMessage = document.getElementById('loading-message');
             const testimonialCarousel = document.getElementById('testimonial-carousel');
             let allProducts = [];
+            let testimonialInterval;
 
-            // --- LÓGICA DE CATEGORIZAÇÃO REFINADA ---
             function assignCategory(productName) {
                 const name = productName.toLowerCase();
-                // Verifica as categorias mais específicas primeiro para evitar conflitos
                 if (/\b(meia|cueca|camiseta|calça|tênis|mochila|mala|jaqueta)\b/.test(name)) return 'Moda e Acessórios';
                 if (/\b(ferramenta|furadeira|parafusadeira|serra|soprador|chave de fenda|alicate|jogo de soquete)\b/.test(name)) return 'Ferramentas';
                 if (/\b(playstation|ps4|ps5|xbox|nintendo|console|jogo astro bot|spider-man 2|mario kart)\b/.test(name)) return 'Games';
@@ -150,7 +188,7 @@
                     displayTestimonials();
                 } catch (error) {
                     console.error("Erro ao carregar ou processar produtos:", error);
-                    loadingMessage.textContent = 'Não foi possível encontrar os tesouros. Verifique se o arquivo "products.json" está na mesma pasta do index.html.';
+                    loadingMessage.textContent = 'Não foi possível encontrar os tesouros. Verifique o arquivo "products.json".';
                 }
             }
             
@@ -171,7 +209,8 @@
 
                 return `
                     <div class="product-card flex-shrink-0 w-64 rounded-lg flex flex-col">
-                        <div class="relative overflow-hidden group">
+                        <div class="relative overflow-hidden group product-image-container">
+                            <div class="shine-effect"></div>
                             <img class="w-full h-48 object-cover" src="${product.imageUrl}" alt="${product.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x400/161b22/c9d1d9?text=Imagem+Indispon%C3%ADvel';">
                             ${discount > 0 ? `<div class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">${discount}% OFF</div>` : ''}
                         </div>
@@ -198,26 +237,17 @@
 
             function displayCategories(products) {
                 if (!sectionsContainer) return;
-
                 const groupedByCategory = products.reduce((acc, product) => {
-                    const category = product.category || 'Outros';
-                    if (!acc[category]) acc[category] = [];
-                    acc[category].push(product);
+                    (acc[product.category] = acc[product.category] || []).push(product);
                     return acc;
                 }, {});
 
                 sectionsContainer.innerHTML = ''; 
-
                 const categoryOrder = ['Games', 'Acessórios', 'Informática', 'Eletrônicos', 'Eletrodomésticos', 'Ferramentas', 'Moda e Acessórios', 'Suplementos', 'Outros'];
-                const sortedCategories = Object.keys(groupedByCategory).sort((a, b) => {
-                    const indexA = categoryOrder.indexOf(a);
-                    const indexB = categoryOrder.indexOf(b);
-                    if (indexA === -1) return 1;
-                    if (indexB === -1) return -1;
-                    return indexA - indexB;
-                });
-
-                for (const category of sortedCategories) {
+                
+                for (const category of categoryOrder) {
+                    if (!groupedByCategory[category]) continue;
+                    
                     const productsInCategory = groupedByCategory[category];
                     const categoryId = `carousel-${category.replace(/[^a-zA-Z0-9]/g, '')}`;
 
@@ -228,13 +258,13 @@
                             <h2 class="text-3xl font-brand font-bold text-amber-300">${category}</h2>
                         </div>
                         <div class="relative carousel-container">
-                            <button class="nav-btn absolute -left-5 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full hover:bg-amber-400 hover:text-slate-900 focus:outline-none" data-carousel="${categoryId}" data-direction="-1">
+                            <button class="nav-btn absolute -left-5 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full" data-carousel="${categoryId}" data-direction="-1">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                             </button>
                             <div id="${categoryId}" class="product-carousel flex gap-6 overflow-x-auto pb-4">
                                 ${productsInCategory.map((p, i) => createProductCard(p, i)).join('')}
                             </div>
-                            <button class="nav-btn absolute -right-5 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full hover:bg-amber-400 hover:text-slate-900 focus:outline-none" data-carousel="${categoryId}" data-direction="1">
+                            <button class="nav-btn absolute -right-5 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full" data-carousel="${categoryId}" data-direction="1">
                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </button>
                         </div>
@@ -253,7 +283,8 @@
                     { name: 'Ricardo M.', avatar: '2', comment: 'Achei que era só mais um site de ofertas, mas a curadoria aqui é fantástica. Virei fã!' },
                     { name: 'Fernanda L.', avatar: '3', comment: 'Finalmente um lugar que reúne os verdadeiros "achadinhos". Economizei muito na compra do meu console novo.' },
                     { name: 'Lucas P.', avatar: '4', comment: 'Todos os dias eu entro pra ver as novidades. É viciante! Já comprei 3 coisas que estavam na minha lista de desejos.' },
-                    { name: 'Ana B.', avatar: '5', comment: 'O gênio do Achadin realmente sabe o que a gente procura. Simplesmente incrível!' }
+                    { name: 'Ana B.', avatar: '5', comment: 'O gênio do Achadin realmente sabe o que a gente procura. Simplesmente incrível!' },
+                    { name: 'Carlos V.', avatar: '6', comment: 'Serviço top! Encontrei uma ferramenta que estava esgotada em todo lugar.'}
                 ];
 
                 testimonialCarousel.innerHTML = testimonials.map(t => `
@@ -262,10 +293,7 @@
                             <img class="w-12 h-12 rounded-full object-cover mr-4 border-2 border-amber-300" src="https://i.pravatar.cc/80?u=${t.avatar}" alt="Avatar de ${t.name}">
                             <div>
                                 <p class="font-bold text-white">${t.name}</p>
-                                <div class="flex items-center">
-                                    <p class="text-xs text-green-400 mr-1">Comprador Verificado</p>
-                                    <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                </div>
+                                <div class="flex items-center"><p class="text-xs text-green-400 mr-1">Comprador Verificado</p><svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg></div>
                             </div>
                         </div>
                         <p class="text-gray-300 text-sm">“${t.comment}”</p>
@@ -273,25 +301,44 @@
                 `).join('');
                 
                 setupIntersectionObserver('.testimonial-card');
+                setupTestimonialAutoplay();
             }
 
             function setupCarouselButtons() {
                 document.querySelectorAll('.nav-btn').forEach(button => {
                     button.addEventListener('click', () => {
-                        const carouselId = button.dataset.carousel;
-                        const direction = parseInt(button.dataset.direction, 10);
-                        const carousel = document.getElementById(carouselId);
+                        const carousel = document.getElementById(button.dataset.carousel);
                         if(carousel) {
-                            const scrollAmount = (carousel.querySelector('.product-card')?.offsetWidth + 24) * 2; // Scroll by two cards
-                            carousel.scrollBy({ left: scrollAmount * direction, behavior: 'smooth' });
+                            const scrollAmount = (carousel.querySelector('.product-card')?.offsetWidth + 24) * 2;
+                            carousel.scrollBy({ left: scrollAmount * parseInt(button.dataset.direction, 10), behavior: 'smooth' });
                         }
                     });
                 });
             }
+            
+            function setupTestimonialAutoplay() {
+                const startAutoplay = () => {
+                    testimonialInterval = setInterval(() => {
+                        if (testimonialCarousel) {
+                            const scrollAmount = testimonialCarousel.querySelector('.testimonial-card')?.offsetWidth + 24;
+                            if (testimonialCarousel.scrollLeft + testimonialCarousel.clientWidth >= testimonialCarousel.scrollWidth -1) {
+                                testimonialCarousel.scrollTo({ left: 0, behavior: 'smooth' });
+                            } else {
+                                testimonialCarousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                            }
+                        }
+                    }, 5000); // Rola a cada 5 segundos
+                };
+
+                const stopAutoplay = () => clearInterval(testimonialInterval);
+
+                testimonialCarousel.addEventListener('mouseenter', stopAutoplay);
+                testimonialCarousel.addEventListener('mouseleave', startAutoplay);
+                
+                startAutoplay();
+            }
 
             function setupIntersectionObserver(selector) {
-                const elements = document.querySelectorAll(selector);
-                if (elements.length === 0) return;
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
@@ -300,7 +347,7 @@
                         }
                     });
                 }, { threshold: 0.1 });
-                elements.forEach(el => observer.observe(el));
+                document.querySelectorAll(selector).forEach(el => observer.observe(el));
             }
 
             loadData();
