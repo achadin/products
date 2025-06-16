@@ -24,7 +24,7 @@
             font-family: 'Playfair Display', serif;
         }
 
-        .product-card {
+        .product-card, .testimonial-card {
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.5s ease-out, transform 0.5s ease-out;
@@ -33,7 +33,7 @@
             overflow: hidden;
         }
 
-        .product-card.is-visible {
+        .product-card.is-visible, .testimonial-card.is-visible {
             opacity: 1;
             transform: translateY(0);
         }
@@ -52,13 +52,28 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
         }
+        
+        /* Custom scrollbar for testimonial carousel */
+        .testimonial-carousel::-webkit-scrollbar {
+            height: 8px;
+        }
+        .testimonial-carousel::-webkit-scrollbar-track {
+            background: #1a224a;
+            border-radius: 10px;
+        }
+        .testimonial-carousel::-webkit-scrollbar-thumb {
+            background: #4a517a;
+            border-radius: 10px;
+        }
+        .testimonial-carousel::-webkit-scrollbar-thumb:hover {
+            background: #FFD700;
+        }
     </style>
 </head>
 <body>
 
     <header class="py-10 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto text-center">
-            <!-- LOGO ATUALIZADO E CENTRALIZADO -->
             <div class="flex flex-col justify-center items-center gap-3 mb-4 group">
                 <img src="logo.png" alt="Logo Achadin" class="h-56 w-56 object-cover rounded-full border-4 border-[#29315c] shadow-lg transition-transform duration-300 ease-in-out group-hover:scale-105">
                 <p class="text-xl text-amber-100/70 mt-2">Seu desejo, nosso achado.</p>
@@ -77,7 +92,20 @@
         </div>
     </main>
 
-    <footer class="py-8 mt-12 border-t border-gray-800/50">
+    <!-- Seção de Testemunhos -->
+    <section id="testimonials-section" class="py-16 bg-[#1a224a]/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-brand font-bold text-amber-300">O que nossos Achadores dizem</h2>
+                <p class="mt-2 text-lg text-amber-100/70">A magia de encontrar o incrível, na voz de quem já descobriu.</p>
+            </div>
+            <div id="testimonial-carousel" class="testimonial-carousel flex gap-6 overflow-x-auto pb-4">
+                <!-- Comentários serão inseridos aqui -->
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-8 mt-12 border-t border-transparent">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
             <p>&copy; 2024 Achadin. Todos os direitos reservados.</p>
         </div>
@@ -88,6 +116,7 @@
             const productGrid = document.getElementById('product-grid');
             const loadingMessage = document.getElementById('loading-message');
             const categoryFiltersContainer = document.getElementById('category-filters');
+            const testimonialCarousel = document.getElementById('testimonial-carousel');
             let allProducts = [];
 
             // --- LÓGICA DE CATEGORIZAÇÃO DINÂMICA ---
@@ -108,15 +137,12 @@
                     
                     const productsData = await response.json();
                     
-                    // Adiciona a categoria dinamicamente a cada produto
-                    allProducts = productsData.map(product => ({
-                        ...product,
-                        category: assignCategory(product.name)
-                    }));
+                    allProducts = productsData.map(product => ({ ...product, category: assignCategory(product.name) }));
 
                     loadingMessage.style.display = 'none';
                     setupCategoryFilters(allProducts);
                     displayProducts(allProducts);
+                    displayTestimonials(); // Chama a função dos testemunhos
                 } catch (error) {
                     console.error("Erro ao carregar ou processar produtos:", error);
                     loadingMessage.textContent = 'Não foi possível encontrar os tesouros. Verifique se o arquivo "products.json" está na mesma pasta do index.html.';
@@ -199,12 +225,41 @@
                     productGrid.appendChild(card);
                 });
 
-                setupIntersectionObserver();
+                setupIntersectionObserver('.product-card');
             }
 
-            function setupIntersectionObserver() {
-                const cards = document.querySelectorAll('.product-card');
-                if (cards.length === 0) return;
+            function displayTestimonials() {
+                if(!testimonialCarousel) return;
+                const testimonials = [
+                    { name: 'Juliana S.', avatar: '1', comment: 'Encontrei uma oferta de um fone que eu queria há meses! É como mágica, recomendo demais.' },
+                    { name: 'Ricardo M.', avatar: '2', comment: 'Achei que era só mais um site de ofertas, mas a curadoria aqui é fantástica. Virei fã!' },
+                    { name: 'Fernanda L.', avatar: '3', comment: 'Finalmente um lugar que reúne os verdadeiros "achadinhos". Economizei muito na compra do meu console novo.' },
+                    { name: 'Lucas P.', avatar: '4', comment: 'Todos os dias eu entro pra ver as novidades. É viciante! Já comprei 3 coisas que estavam na minha lista de desejos.' },
+                    { name: 'Ana B.', avatar: '5', comment: 'O gênio do Achadin realmente sabe o que a gente procura. Simplesmente incrível!' }
+                ];
+
+                testimonialCarousel.innerHTML = testimonials.map(t => `
+                    <div class="testimonial-card flex-shrink-0 w-80 rounded-lg p-6">
+                        <div class="flex items-center mb-4">
+                            <img class="w-12 h-12 rounded-full object-cover mr-4 border-2 border-amber-300" src="https://i.pravatar.cc/80?u=${t.avatar}" alt="Avatar de ${t.name}">
+                            <div>
+                                <p class="font-bold text-white">${t.name}</p>
+                                <div class="flex items-center">
+                                    <p class="text-xs text-green-400 mr-1">Comprador Verificado</p>
+                                    <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-300 text-sm">“${t.comment}”</p>
+                    </div>
+                `).join('');
+                
+                setupIntersectionObserver('.testimonial-card');
+            }
+
+            function setupIntersectionObserver(selector) {
+                const elements = document.querySelectorAll(selector);
+                if (elements.length === 0) return;
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
@@ -213,7 +268,7 @@
                         }
                     });
                 }, { threshold: 0.1 });
-                cards.forEach(card => observer.observe(card));
+                elements.forEach(el => observer.observe(el));
             }
 
             loadProducts();
