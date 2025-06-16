@@ -47,7 +47,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
             transform: scale(0);
             transition: opacity 0.6s ease, transform 0.6s ease;
             opacity: 0;
@@ -85,10 +85,9 @@
             const productGrid = document.getElementById('product-grid');
             const loadingMessage = document.getElementById('loading-message');
 
-            // --- LÓGICA PARA CARREGAR PRODUTOS DO ARQUIVO JSON ---
             async function loadProducts() {
                 try {
-                    const response = await fetch('products.json'); // Busca o arquivo JSON
+                    const response = await fetch('products.json');
                     if (!response.ok) {
                         throw new Error(`Erro HTTP! status: ${response.status}`);
                     }
@@ -101,24 +100,19 @@
                 }
             }
 
-            // --- FUNÇÃO PARA CRIAR ÍCONES DE ESTRELA ---
             function createStarRating(rating) {
-                const fullStars = Math.floor(rating);
-                const halfStar = rating % 1 !== 0;
+                const safeRating = parseFloat(rating) || 0;
+                const fullStars = Math.floor(safeRating);
+                const halfStar = safeRating % 1 >= 0.5;
                 let starsHTML = '';
                 
-                // Estrelas cheias
                 for (let i = 0; i < fullStars; i++) {
                     starsHTML += `<svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>`;
                 }
-
-                // Meia estrela
-                if (halfStar) {
-                    starsHTML += `<svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8-2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292zM10 12.433V6.253l.816 2.508a1 1 0 00.95.69h2.766l-2.238 1.626a1 1 0 00-.364 1.118l.816 2.508L10 12.433z"/></svg>`;
+                if (halfStar && fullStars < 5) {
+                    starsHTML += `<svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292zM10 12.433V6.253l.816 2.508a1 1 0 00.95.69h2.766l-2.238 1.626a1 1 0 00-.364 1.118l.816 2.508L10 12.433z"/></svg>`;
                 }
-
-                // Estrelas vazias
-                const emptyStars = 5 - Math.ceil(rating);
+                const emptyStars = 5 - Math.ceil(safeRating);
                 for (let i = 0; i < emptyStars; i++) {
                     starsHTML += `<svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>`;
                 }
@@ -126,39 +120,40 @@
                 return `<div class="flex items-center">${starsHTML}</div>`;
             }
 
-            // --- LÓGICA PARA EXIBIR OS PRODUTOS NA PÁGINA ---
             function displayProducts(products) {
                  if (!productGrid || !Array.isArray(products)) return;
                 productGrid.innerHTML = ''; 
 
                 products.forEach((product, index) => {
                     const card = document.createElement('div');
-                    card.className = 'product-card rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ease-in-out flex flex-col relative';
+                    card.className = 'product-card rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-1 hover:shadow-cyan-500/10 transition-all duration-300 ease-in-out flex flex-col';
                     
-                    const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+                    const discount = Math.round(((parseFloat(product.originalPrice) - parseFloat(product.price)) / parseFloat(product.originalPrice)) * 100);
                     
                     card.innerHTML = `
-                        <div class="relative overflow-hidden">
+                        <div class="relative overflow-hidden group">
                             <div class="shine-effect"></div>
-                            <img class="w-full h-52 object-cover transition-transform duration-300 group-hover:scale-110" src="${product.imageUrl}" alt="${product.name}" onerror="this.onerror=null;this.src='https://placehold.co/400x400/161b22/c9d1d9?text=Imagem+Indispon%C3%ADvel';">
-                            <div class="absolute top-3 left-3 bg-gray-900/60 text-white text-sm font-bold w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-sm border border-gray-700">${index + 1}</div>
-                            ${discount > 0 ? `<div class="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">${discount}% OFF</div>` : ''}
+                            <img class="w-full h-48 object-cover" src="${product.imageUrl}" alt="${product.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x400/161b22/c9d1d9?text=Imagem+Indispon%C3%ADvel';">
+                            <div class="absolute top-2 left-2 bg-gray-900/60 text-white text-xs font-bold w-8 h-8 flex items-center justify-center rounded-full backdrop-blur-sm border border-gray-700">${index + 1}</div>
+                            ${discount > 0 ? `<div class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">${discount}% OFF</div>` : ''}
                         </div>
                         <div class="p-4 flex-grow flex flex-col">
-                            <h3 class="text-base font-semibold text-gray-200 flex-grow mb-3">${product.name}</h3>
+                            <div class="flex-grow" style="min-height: 80px;">
+                                <h3 class="text-sm font-semibold text-gray-200">${product.name}</h3>
+                            </div>
                             
-                            <div class="mt-auto">
-                                <div class="flex items-baseline mb-2">
-                                    <span class="text-2xl font-bold text-white mr-2">R$ ${product.price}</span>
-                                    <span class="text-sm text-gray-500 line-through">R$ ${product.originalPrice}</span>
+                            <div class="mt-auto pt-2">
+                                <div class="mb-2">
+                                    <span class="text-2xl font-bold text-white">R$${product.price}</span>
+                                    ${product.originalPrice && parseFloat(product.originalPrice) > parseFloat(product.price) ? `<span class="ml-2 text-sm text-gray-500 line-through">R$${product.originalPrice}</span>` : ''}
                                 </div>
                                 
-                                <div class="flex items-center space-x-2 text-sm text-gray-400 mb-4">
+                                <div class="flex items-center space-x-2 text-xs text-gray-400 mb-4 h-5">
                                     ${createStarRating(product.rating)}
                                     <span>(${product.reviews} reviews)</span>
                                 </div>
 
-                                <a href="${product.affiliateLink}" target="_blank" rel="noopener noreferrer" class="block w-full bg-blue-600 text-white text-center font-semibold py-2.5 rounded-md hover:bg-blue-500 transition-colors duration-300">
+                                <a href="${product.affiliateLink}" target="_blank" rel="noopener noreferrer" class="block w-full bg-blue-600 text-white text-center font-semibold py-2 rounded-md hover:bg-blue-500 transition-colors duration-300 text-sm">
                                     Ver Oferta
                                 </a>
                             </div>
@@ -170,7 +165,6 @@
                 setupIntersectionObserver();
             }
 
-            // --- LÓGICA PARA ANIMAÇÃO AO ROLAR A PÁGINA ---
             function setupIntersectionObserver() {
                 const cards = document.querySelectorAll('.product-card');
                 if (cards.length === 0) return;
