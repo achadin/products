@@ -117,9 +117,9 @@
         </div>
     </header>
     
-    <!-- BANNER DE DESTAQUE -->
+    <!-- BANNER DE DESTAQUE ATUALIZADO -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <div class="relative rounded-xl overflow-hidden bg-cover bg-center h-64 flex items-center justify-center text-center p-4" style="background-image: url('https://images.unsplash.com/photo-1550246140-5119ae4790b8?q=80&w=2070&auto=format&fit=crop');">
+        <div class="relative rounded-xl overflow-hidden bg-cover bg-center h-64 flex items-center justify-center text-center p-4" style="background-image: url('https://images.unsplash.com/photo-1542862579-231622354318?q=80&w=1974&auto=format&fit=crop');">
             <div class="absolute inset-0 bg-gradient-to-t from-[#0c143d] via-[#0c143d]/70 to-transparent"></div>
             <div class="relative">
                 <h2 class="text-5xl font-brand font-bold text-white shadow-lg">Os Tesouros da Semana</h2>
@@ -188,7 +188,7 @@
                     displayTestimonials();
                 } catch (error) {
                     console.error("Erro ao carregar ou processar produtos:", error);
-                    loadingMessage.textContent = 'Não foi possível encontrar os tesouros. Verifique o arquivo "products.json".';
+                    loadingMessage.textContent = 'Não foi possível encontrar os tesouros. Verifique se o arquivo "products.json" está na mesma pasta do index.html.';
                 }
             }
             
