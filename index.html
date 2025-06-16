@@ -14,8 +14,8 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0c143d;
-            color: #E6E0F8;
+            background-color: #0c143d; /* Azul escuro do logo - COR UNIFICADA */
+            color: #E6E0F8; /* Lavanda suave para texto */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -116,13 +116,18 @@
             const testimonialCarousel = document.getElementById('testimonial-carousel');
             let allProducts = [];
 
+            // --- LÓGICA DE CATEGORIZAÇÃO REFINADA ---
             function assignCategory(productName) {
                 const name = productName.toLowerCase();
-                if (name.includes('playstation') || name.includes('xbox') || name.includes('nintendo') || name.includes('console') || name.includes('jogo')) return 'Games';
-                if (name.includes('fone') || name.includes('headset') || name.includes('mouse') || name.includes('teclado') || name.includes('controle')) return 'Acessórios';
-                if (name.includes('ssd') || name.includes('monitor') || name.includes('webcam') || name.includes('notebook') || name.includes('papel fotográfico')) return 'Informática';
-                if (name.includes('microfone') || name.includes('câmera') || name.includes('celular') || name.includes('smartphone') || name.includes('smartwatch')) return 'Eletrônicos';
-                if (name.includes('liquidificador') || name.includes('batedeira') || name.includes('cafeteira') || name.includes('air fryer')) return 'Eletrodomésticos';
+                // Verifica as categorias mais específicas primeiro para evitar conflitos
+                if (/\b(ferramenta|furadeira|parafusadeira|serra|soprador|soquete)\b/.test(name)) return 'Ferramentas';
+                if (/\b(playstation|ps4|ps5|xbox|nintendo|console|jogo astro bot|spider-man 2|mario kart)\b/.test(name)) return 'Games';
+                if (/\b(fone|headset|mouse|teclado|controle|joystick)\b/.test(name)) return 'Acessórios';
+                if (/\b(ssd|monitor|webcam|notebook|papel fotográfico|impressora|filamento)\b/.test(name)) return 'Informática';
+                if (/\b(microfone|câmera|celular|smartphone|smartwatch|carregador|cabo)\b/.test(name)) return 'Eletrônicos';
+                if (/\b(liquidificador|batedeira|cafeteira|air fryer|sanduicheira|chaleira|aquecedor|fogão|grill)\b/.test(name)) return 'Eletrodomésticos';
+                if (/\b(creatina|whey|suplemento)\b/.test(name)) return 'Suplementos';
+                if (/\b(mochila|mala|cueca|tênis|bota|camiseta|calça|meia)\b/.test(name)) return 'Moda e Acessórios';
                 return 'Outros';
             }
 
@@ -142,7 +147,7 @@
                     loadingMessage.textContent = 'Não foi possível encontrar os tesouros. Verifique se o arquivo "products.json" está na mesma pasta do index.html.';
                 }
             }
-
+            
             function createStarRating(rating) {
                 const safeRating = parseFloat(rating) || 0;
                 let starsHTML = '';
@@ -162,7 +167,6 @@
                     <div class="product-card flex-shrink-0 w-64 rounded-lg flex flex-col">
                         <div class="relative overflow-hidden group">
                             <img class="w-full h-48 object-cover" src="${product.imageUrl}" alt="${product.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x400/161b22/c9d1d9?text=Imagem+Indispon%C3%ADvel';">
-                            <div class="absolute top-2 left-2 bg-gray-900/60 text-white text-xs font-bold w-8 h-8 flex items-center justify-center rounded-full backdrop-blur-sm border border-gray-700">${index + 1}</div>
                             ${discount > 0 ? `<div class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">${discount}% OFF</div>` : ''}
                         </div>
                         <div class="p-4 flex-grow flex flex-col">
@@ -198,14 +202,13 @@
 
                 sectionsContainer.innerHTML = ''; 
 
-                const categoryOrder = ['Games', 'Acessórios', 'Informática', 'Eletrônicos', 'Eletrodomésticos', 'Outros'];
+                const categoryOrder = ['Games', 'Acessórios', 'Informática', 'Eletrônicos', 'Eletrodomésticos', 'Ferramentas', 'Moda e Acessórios', 'Suplementos', 'Outros'];
                 const sortedCategories = Object.keys(groupedByCategory).sort((a, b) => {
                     const indexA = categoryOrder.indexOf(a);
                     const indexB = categoryOrder.indexOf(b);
-                    if (indexA > -1 && indexB > -1) return indexA - indexB;
-                    if (indexA > -1) return -1;
-                    if (indexB > -1) return 1;
-                    return a.localeCompare(b);
+                    if (indexA === -1) return 1;
+                    if (indexB === -1) return -1;
+                    return indexA - indexB;
                 });
 
                 for (const category of sortedCategories) {
