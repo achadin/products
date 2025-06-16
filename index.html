@@ -39,12 +39,18 @@
         }
 
         .nav-btn {
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            opacity: 0.5; /* Botões sempre visíveis com uma leve transparência */
+            transition: opacity 0.3s ease, transform 0.2s ease;
+            background-color: rgba(26, 34, 74, 0.5);
+            backdrop-filter: blur(4px);
         }
 
         .carousel-container:hover .nav-btn {
             opacity: 1;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-50%) scale(1.1);
         }
         
         .product-carousel {
@@ -120,14 +126,14 @@
             function assignCategory(productName) {
                 const name = productName.toLowerCase();
                 // Verifica as categorias mais específicas primeiro para evitar conflitos
-                if (/\b(ferramenta|furadeira|parafusadeira|serra|soprador|soquete)\b/.test(name)) return 'Ferramentas';
+                if (/\b(meia|cueca|camiseta|calça|tênis|mochila|mala|jaqueta)\b/.test(name)) return 'Moda e Acessórios';
+                if (/\b(ferramenta|furadeira|parafusadeira|serra|soprador|chave de fenda|alicate|jogo de soquete)\b/.test(name)) return 'Ferramentas';
                 if (/\b(playstation|ps4|ps5|xbox|nintendo|console|jogo astro bot|spider-man 2|mario kart)\b/.test(name)) return 'Games';
                 if (/\b(fone|headset|mouse|teclado|controle|joystick)\b/.test(name)) return 'Acessórios';
                 if (/\b(ssd|monitor|webcam|notebook|papel fotográfico|impressora|filamento)\b/.test(name)) return 'Informática';
-                if (/\b(microfone|câmera|celular|smartphone|smartwatch|carregador|cabo)\b/.test(name)) return 'Eletrônicos';
+                if (/\b(microfone|câmera|celular|smartphone|smartwatch|carregador|cabo|projetor|receptor)\b/.test(name)) return 'Eletrônicos';
                 if (/\b(liquidificador|batedeira|cafeteira|air fryer|sanduicheira|chaleira|aquecedor|fogão|grill)\b/.test(name)) return 'Eletrodomésticos';
                 if (/\b(creatina|whey|suplemento)\b/.test(name)) return 'Suplementos';
-                if (/\b(mochila|mala|cueca|tênis|bota|camiseta|calça|meia)\b/.test(name)) return 'Moda e Acessórios';
                 return 'Outros';
             }
 
@@ -222,13 +228,13 @@
                             <h2 class="text-3xl font-brand font-bold text-amber-300">${category}</h2>
                         </div>
                         <div class="relative carousel-container">
-                            <button class="nav-btn absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-gray-900/50 p-2 rounded-full hover:bg-amber-400 hover:text-slate-900 focus:outline-none" data-carousel="${categoryId}" data-direction="-1">
+                            <button class="nav-btn absolute -left-5 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full hover:bg-amber-400 hover:text-slate-900 focus:outline-none" data-carousel="${categoryId}" data-direction="-1">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                             </button>
                             <div id="${categoryId}" class="product-carousel flex gap-6 overflow-x-auto pb-4">
                                 ${productsInCategory.map((p, i) => createProductCard(p, i)).join('')}
                             </div>
-                            <button class="nav-btn absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-gray-900/50 p-2 rounded-full hover:bg-amber-400 hover:text-slate-900 focus:outline-none" data-carousel="${categoryId}" data-direction="1">
+                            <button class="nav-btn absolute -right-5 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full hover:bg-amber-400 hover:text-slate-900 focus:outline-none" data-carousel="${categoryId}" data-direction="1">
                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </button>
                         </div>
