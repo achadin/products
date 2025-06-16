@@ -14,8 +14,8 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0c143d; /* Azul escuro do logo - COR UNIFICADA */
-            color: #E6E0F8; /* Lavanda suave para texto */
+            background-color: #0c143d;
+            color: #E6E0F8;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -38,22 +38,24 @@
             transform: translateY(0);
         }
 
-        .category-btn {
-            background-color: #1a224a;
-            border: 1px solid #29315c;
-            color: #E6E0F8;
-            transition: all 0.3s ease;
+        .nav-btn {
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .category-btn:hover, .category-btn.active {
-            background-color: #FFD700;
-            color: #0c143d;
-            border-color: #FFD700;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+        .carousel-container:hover .nav-btn {
+            opacity: 1;
         }
         
-        /* Custom scrollbar for testimonial carousel */
+        .product-carousel {
+            scroll-behavior: smooth;
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+        .product-carousel::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, and Opera */
+        }
+
         .testimonial-carousel::-webkit-scrollbar {
             height: 8px;
         }
@@ -82,14 +84,10 @@
     </header>
 
     <main class="pb-12 sm:pb-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div id="category-filters" class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8 md:mb-12">
-            </div>
-            
-            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            </div>
-            <div id="loading-message" class="text-center text-gray-400 text-lg mt-8">Carregando seus achados...</div>
+        <div id="category-sections" class="space-y-16">
+            <!-- As seções de categorias serão injetadas aqui pelo JavaScript -->
         </div>
+        <div id="loading-message" class="text-center text-gray-400 text-lg mt-8">Carregando seus achados...</div>
     </main>
 
     <!-- Seção de Testemunhos -->
@@ -113,13 +111,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const productGrid = document.getElementById('product-grid');
+            const sectionsContainer = document.getElementById('category-sections');
             const loadingMessage = document.getElementById('loading-message');
-            const categoryFiltersContainer = document.getElementById('category-filters');
             const testimonialCarousel = document.getElementById('testimonial-carousel');
             let allProducts = [];
 
-            // --- LÓGICA DE CATEGORIZAÇÃO DINÂMICA ---
             function assignCategory(productName) {
                 const name = productName.toLowerCase();
                 if (name.includes('playstation') || name.includes('xbox') || name.includes('nintendo') || name.includes('console') || name.includes('jogo')) return 'Games';
@@ -127,47 +123,24 @@
                 if (name.includes('ssd') || name.includes('monitor') || name.includes('webcam') || name.includes('notebook') || name.includes('papel fotográfico')) return 'Informática';
                 if (name.includes('microfone') || name.includes('câmera') || name.includes('celular') || name.includes('smartphone') || name.includes('smartwatch')) return 'Eletrônicos';
                 if (name.includes('liquidificador') || name.includes('batedeira') || name.includes('cafeteira') || name.includes('air fryer')) return 'Eletrodomésticos';
-                return 'Outros'; // Categoria padrão
+                return 'Outros';
             }
 
-            async function loadProducts() {
+            async function loadData() {
                 try {
                     const response = await fetch('products.json?v=' + new Date().getTime());
                     if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
-                    
                     const productsData = await response.json();
                     
                     allProducts = productsData.map(product => ({ ...product, category: assignCategory(product.name) }));
 
                     loadingMessage.style.display = 'none';
-                    setupCategoryFilters(allProducts);
-                    displayProducts(allProducts);
-                    displayTestimonials(); // Chama a função dos testemunhos
+                    displayCategories(allProducts);
+                    displayTestimonials();
                 } catch (error) {
                     console.error("Erro ao carregar ou processar produtos:", error);
                     loadingMessage.textContent = 'Não foi possível encontrar os tesouros. Verifique se o arquivo "products.json" está na mesma pasta do index.html.';
                 }
-            }
-            
-            function setupCategoryFilters(products) {
-                if (!categoryFiltersContainer) return;
-                const categories = ['Todos', ...new Set(products.map(p => p.category).filter(Boolean))].sort();
-                
-                categoryFiltersContainer.innerHTML = categories.map(category => 
-                    `<button class="category-btn px-4 py-2 rounded-full font-semibold text-sm shadow-md ${category === 'Todos' ? 'active' : ''}" data-category="${category}">
-                        ${category}
-                    </button>`
-                ).join('');
-
-                categoryFiltersContainer.addEventListener('click', (e) => {
-                    if (e.target.tagName === 'BUTTON') {
-                        const selectedCategory = e.target.dataset.category;
-                        document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-                        e.target.classList.add('active');
-                        const filteredProducts = selectedCategory === 'Todos' ? allProducts : allProducts.filter(p => p.category === selectedCategory);
-                        displayProducts(filteredProducts);
-                    }
-                });
             }
 
             function createStarRating(rating) {
@@ -180,24 +153,13 @@
                 return `<div class="flex items-center">${starsHTML}</div>`;
             }
 
-            function displayProducts(products) {
-                if (!productGrid) return;
-                productGrid.innerHTML = ''; 
+            function createProductCard(product, index) {
+                const originalPrice = parseFloat(product.originalPrice);
+                const currentPrice = parseFloat(product.price);
+                const discount = originalPrice > currentPrice ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
 
-                if(products.length === 0){
-                    productGrid.innerHTML = `<p class="text-center text-gray-400 col-span-full">Nenhum achado encontrado nesta categoria.</p>`;
-                    return;
-                }
-
-                products.forEach((product, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'product-card rounded-lg flex flex-col';
-                    
-                    const originalPrice = parseFloat(product.originalPrice);
-                    const currentPrice = parseFloat(product.price);
-                    const discount = originalPrice > currentPrice ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
-                    
-                    card.innerHTML = `
+                return `
+                    <div class="product-card flex-shrink-0 w-64 rounded-lg flex flex-col">
                         <div class="relative overflow-hidden group">
                             <img class="w-full h-48 object-cover" src="${product.imageUrl}" alt="${product.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x400/161b22/c9d1d9?text=Imagem+Indispon%C3%ADvel';">
                             <div class="absolute top-2 left-2 bg-gray-900/60 text-white text-xs font-bold w-8 h-8 flex items-center justify-center rounded-full backdrop-blur-sm border border-gray-700">${index + 1}</div>
@@ -221,11 +183,58 @@
                                 </a>
                             </div>
                         </div>
-                    `;
-                    productGrid.appendChild(card);
+                    </div>`;
+            }
+
+            function displayCategories(products) {
+                if (!sectionsContainer) return;
+
+                const groupedByCategory = products.reduce((acc, product) => {
+                    const category = product.category || 'Outros';
+                    if (!acc[category]) acc[category] = [];
+                    acc[category].push(product);
+                    return acc;
+                }, {});
+
+                sectionsContainer.innerHTML = ''; 
+
+                const categoryOrder = ['Games', 'Acessórios', 'Informática', 'Eletrônicos', 'Eletrodomésticos', 'Outros'];
+                const sortedCategories = Object.keys(groupedByCategory).sort((a, b) => {
+                    const indexA = categoryOrder.indexOf(a);
+                    const indexB = categoryOrder.indexOf(b);
+                    if (indexA > -1 && indexB > -1) return indexA - indexB;
+                    if (indexA > -1) return -1;
+                    if (indexB > -1) return 1;
+                    return a.localeCompare(b);
                 });
 
+                for (const category of sortedCategories) {
+                    const productsInCategory = groupedByCategory[category];
+                    const categoryId = `carousel-${category.replace(/[^a-zA-Z0-9]/g, '')}`;
+
+                    const section = document.createElement('section');
+                    section.className = 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8';
+                    section.innerHTML = `
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-3xl font-brand font-bold text-amber-300">${category}</h2>
+                        </div>
+                        <div class="relative carousel-container">
+                            <button class="nav-btn absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-gray-900/50 p-2 rounded-full hover:bg-amber-400 hover:text-slate-900 focus:outline-none" data-carousel="${categoryId}" data-direction="-1">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
+                            <div id="${categoryId}" class="product-carousel flex gap-6 overflow-x-auto pb-4">
+                                ${productsInCategory.map((p, i) => createProductCard(p, i)).join('')}
+                            </div>
+                            <button class="nav-btn absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-gray-900/50 p-2 rounded-full hover:bg-amber-400 hover:text-slate-900 focus:outline-none" data-carousel="${categoryId}" data-direction="1">
+                               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+                        </div>
+                    `;
+                    sectionsContainer.appendChild(section);
+                }
+                
                 setupIntersectionObserver('.product-card');
+                setupCarouselButtons();
             }
 
             function displayTestimonials() {
@@ -257,6 +266,20 @@
                 setupIntersectionObserver('.testimonial-card');
             }
 
+            function setupCarouselButtons() {
+                document.querySelectorAll('.nav-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const carouselId = button.dataset.carousel;
+                        const direction = parseInt(button.dataset.direction, 10);
+                        const carousel = document.getElementById(carouselId);
+                        if(carousel) {
+                            const scrollAmount = (carousel.querySelector('.product-card')?.offsetWidth + 24) * 2; // Scroll by two cards
+                            carousel.scrollBy({ left: scrollAmount * direction, behavior: 'smooth' });
+                        }
+                    });
+                });
+            }
+
             function setupIntersectionObserver(selector) {
                 const elements = document.querySelectorAll(selector);
                 if (elements.length === 0) return;
@@ -271,7 +294,7 @@
                 elements.forEach(el => observer.observe(el));
             }
 
-            loadProducts();
+            loadData();
         });
     </script>
 
