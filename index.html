@@ -11,6 +11,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
     
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -186,10 +188,7 @@
         </div>
     </footer>
 
-<script>
-        // --------------- ESTRUTURA CORRIGIDA ---------------
-        // A função do carrossel foi movida para FORA do 'DOMContentLoaded'
-        // para que o Alpine.js (x-data) possa encontrá-la.
+    <script>
         function bannerCarousel() {
             return {
                 activeSlide: 0,
@@ -224,7 +223,6 @@
             }
         }
 
-        // O restante do código, que depende do carregamento do HTML, permanece aqui dentro.
         document.addEventListener('DOMContentLoaded', function() {
             const sectionsContainer = document.getElementById('category-sections');
             const loadingMessage = document.getElementById('loading-message');
@@ -424,5 +422,6 @@
             loadData();
         });
     </script>
+
 </body>
 </html>
