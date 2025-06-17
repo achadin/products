@@ -1,0 +1,17 @@
+.secao-tesouros { /* Use o seletor CSS correto para o seu banner */
+  background-image: url('images/banner-tesouros.jpg');
+
+  /* Propriedades recomendadas para ajustar o fundo */
+  background-size: cover; /* Faz a imagem cobrir toda a área do banner */
+  background-position: center; /* Centraliza a imagem */
+  background-repeat: no-repeat; /* Evita que a imagem se repita */
+  height: 300px; /* Defina uma altura para o banner */
+  width: 100%; /* Opcional, para garantir que ocupe a largura toda */
+  
+  /* Estilos para centralizar o texto sobre a imagem */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white; /* Mude a cor do texto para ter contraste com a imagem */
+}
