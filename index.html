@@ -186,20 +186,23 @@
         </div>
     </footer>
 
-    <script>
+<script>
+        // --------------- ESTRUTURA CORRIGIDA ---------------
+        // A função do carrossel foi movida para FORA do 'DOMContentLoaded'
+        // para que o Alpine.js (x-data) possa encontrá-la.
         function bannerCarousel() {
             return {
                 activeSlide: 0,
                 autoplayInterval: null,
                 autoplayDelay: 5000, // Tempo em milissegundos (5 segundos)
                 images: [
-                    { src: 'images/banner1.png', title: 'Os Tesouros da Semana', subtitle: 'Achados incríveis que acabaram de chegar!' },
-                    { src: 'images/banner2.png', title: 'Promoções Imperdíveis', subtitle: 'Descontos exclusivos para você.' },
-                    { src: 'images/banner3.png', title: 'Novidades em Games', subtitle: 'Os lançamentos mais esperados.' },
-                    { src: 'images/banner4.png', title: 'Eletrônicos em Destaque', subtitle: 'A tecnologia que você precisa.' },
-                    { src: 'images/banner5.png', title: 'Para sua Casa', subtitle: 'Conforto e praticidade no seu lar.' },
-                    { src: 'images/banner6.png', title: 'Moda e Estilo', subtitle: 'As últimas tendências estão aqui.' },
-                    { src: 'images/banner7.png', title: 'Não Perca!', subtitle: 'Ofertas por tempo limitado.' }
+                    { src: './images/banner1.png', title: 'Os Tesouros da Semana', subtitle: 'Achados incríveis que acabaram de chegar!' },
+                    { src: './images/banner2.png', title: 'Promoções Imperdíveis', subtitle: 'Descontos exclusivos para você.' },
+                    { src: './images/banner3.png', title: 'Novidades em Games', subtitle: 'Os lançamentos mais esperados.' },
+                    { src: './images/banner4.png', title: 'Eletrônicos em Destaque', subtitle: 'A tecnologia que você precisa.' },
+                    { src: './images/banner5.png', title: 'Para sua Casa', subtitle: 'Conforto e praticidade no seu lar.' },
+                    { src: './images/banner6.png', title: 'Moda e Estilo', subtitle: 'As últimas tendências estão aqui.' },
+                    { src: './images/banner7.png', title: 'Não Perca!', subtitle: 'Ofertas por tempo limitado.' }
                 ],
                 init() {
                     this.startAutoplay();
@@ -221,6 +224,7 @@
             }
         }
 
+        // O restante do código, que depende do carregamento do HTML, permanece aqui dentro.
         document.addEventListener('DOMContentLoaded', function() {
             const sectionsContainer = document.getElementById('category-sections');
             const loadingMessage = document.getElementById('loading-message');
@@ -420,6 +424,5 @@
             loadData();
         });
     </script>
-
 </body>
 </html>
