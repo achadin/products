@@ -111,32 +111,64 @@
     <header class="py-10 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto text-center">
             <div class="flex flex-col justify-center items-center gap-3 mb-10 group">
-                <!-- LOGO CARREGADO LOCALMENTE -->
                 <img src="logo.png" alt="Logo Achadin" class="h-56 w-56 object-cover rounded-full border-4 border-[#29315c] shadow-lg transition-transform duration-300 ease-in-out group-hover:scale-105">
                 <p class="text-xl text-amber-100/70 mt-2">Seu desejo, nosso achado.</p>
             </div>
         </div>
     </header>
     
-    <!-- BANNER DE DESTAQUE ATUALIZADO -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <div class="relative rounded-xl overflow-hidden bg-cover bg-center h-64 flex items-center justify-center text-center p-4" style="background-image: url('https://images.unsplash.com/photo-1542862579-231622354318?q=80&w=1974&auto=format&fit=crop');">
-            <div class="absolute inset-0 bg-gradient-to-t from-[#0c143d] via-[#0c143d]/70 to-transparent"></div>
-            <div class="relative">
-                <h2 class="text-5xl font-brand font-bold text-white shadow-lg">Os Tesouros da Semana</h2>
-                <p class="text-amber-100/80 mt-2 text-lg">Achados incríveis que acabaram de chegar!</p>
-            </div>
+    <section 
+        x-data="bannerCarousel()" 
+        x-init="init()"
+        @mouseenter="stopAutoplay"
+        @mouseleave="startAutoplay"
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 relative">
+        
+        <div class="relative rounded-xl overflow-hidden h-64 md:h-80 shadow-lg">
+            <template x-for="(image, index) in images" :key="index">
+                <div 
+                    x-show="activeSlide === index" 
+                    x-transition:enter="transition ease-in-out duration-500"
+                    x-transition:enter-start="opacity-0 transform scale-95"
+                    x-transition:enter-end="opacity-100 transform scale-100"
+                    x-transition:leave="transition ease-in-out duration-500"
+                    x-transition:leave-start="opacity-100 transform scale-100"
+                    x-transition:leave-end="opacity-0 transform scale-95"
+                    class="absolute inset-0 w-full h-full bg-cover bg-center"
+                    :style="`background-image: url('${image.src}')`">
+                    
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#0c143d] via-[#0c143d]/60 to-transparent flex flex-col items-center justify-center text-center p-4">
+                        <h2 class="text-5xl font-brand font-bold text-white shadow-lg" x-text="image.title"></h2>
+                        <p class="text-amber-100/80 mt-2 text-lg" x-text="image.subtitle"></p>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div class="absolute inset-0 flex items-center justify-between px-2">
+            <button @click="prevSlide" class="text-white bg-black/30 hover:bg-black/50 p-2 rounded-full transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <button @click="nextSlide" class="text-white bg-black/30 hover:bg-black/50 p-2 rounded-full transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+        </div>
+
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+            <template x-for="(image, index) in images" :key="index">
+                <button @click="activeSlide = index" 
+                        class="w-3 h-3 rounded-full transition-colors duration-300"
+                        :class="{'bg-amber-400': activeSlide === index, 'bg-white/40 hover:bg-white/70': activeSlide !== index}">
+                </button>
+            </template>
         </div>
     </section>
-
     <main class="pb-12 sm:pb-16">
         <div id="category-sections" class="space-y-16">
-            <!-- As seções de categorias serão injetadas aqui -->
-        </div>
+            </div>
         <div id="loading-message" class="text-center text-gray-400 text-lg mt-8">Carregando seus achados...</div>
     </main>
 
-    <!-- Seção de Testemunhos -->
     <section id="testimonials-section" class="py-16 bg-[#1a224a]/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
@@ -144,8 +176,7 @@
                 <p class="mt-2 text-lg text-amber-100/70">A magia de encontrar o incrível, na voz de quem já descobriu.</p>
             </div>
             <div id="testimonial-carousel" class="testimonial-carousel flex gap-6 overflow-x-auto pb-4">
-                <!-- Comentários serão inseridos aqui -->
-            </div>
+                </div>
         </div>
     </section>
 
@@ -156,6 +187,36 @@
     </footer>
 
     <script>
+        function bannerCarousel() {
+            return {
+                activeSlide: 0,
+                autoplayInterval: null,
+                autoplayDelay: 5000, // Tempo em milissegundos (5 segundos)
+                images: [
+                    { src: 'images/banner1.jpg', title: 'Os Tesouros da Semana', subtitle: 'Achados incríveis que acabaram de chegar!' },
+                    { src: 'images/banner2.jpg', title: 'Promoções Imperdíveis', subtitle: 'Descontos exclusivos para você.' },
+                    { src: 'images/banner3.jpg', title: 'Novidades em Games', subtitle: 'Os lançamentos mais esperados.' }
+                ],
+                init() {
+                    this.startAutoplay();
+                },
+                nextSlide() {
+                    this.activeSlide = (this.activeSlide + 1) % this.images.length;
+                },
+                prevSlide() {
+                    this.activeSlide = (this.activeSlide - 1 + this.images.length) % this.images.length;
+                },
+                startAutoplay() {
+                    this.autoplayInterval = setInterval(() => {
+                        this.nextSlide();
+                    }, this.autoplayDelay);
+                },
+                stopAutoplay() {
+                    clearInterval(this.autoplayInterval);
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const sectionsContainer = document.getElementById('category-sections');
             const loadingMessage = document.getElementById('loading-message');
