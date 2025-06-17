@@ -165,6 +165,20 @@
             </template>
         </div>
     </section>
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+        <div class="relative">
+            <input 
+                id="search-input" 
+                type="text" 
+                placeholder="Buscar por produto..." 
+                class="w-full bg-[#1a224a] border border-[#29315c] rounded-lg py-3 pl-10 pr-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all">
+            <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+            </div>
+        </div>
+    </section>
     <main class="pb-12 sm:pb-16">
         <div id="category-sections" class="space-y-16">
             </div>
@@ -184,7 +198,7 @@
 
     <footer class="py-8 mt-12 border-t border-transparent">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
-            <p>&copy; 2024 Achadin. Todos os direitos reservados.</p>
+            <p>&copy; 2025 Achadin. Todos os direitos reservados.</p>
         </div>
     </footer>
 
@@ -253,8 +267,22 @@
                     allProducts = productsData.map(product => ({ ...product, category: assignCategory(product.name) }));
 
                     loadingMessage.style.display = 'none';
-                    displayCategories(allProducts);
+                    // Exibe todos os produtos inicialmente
+                    displayCategories(allProducts); 
                     displayTestimonials();
+
+                    // --- LÓGICA DA BUSCA ---
+                    const searchInput = document.getElementById('search-input');
+                    searchInput.addEventListener('input', (e) => {
+                        const query = e.target.value.toLowerCase();
+                        if (query.length > 2 || query.length === 0) { // Filtra a partir de 3 caracteres ou quando apaga tudo
+                            const filteredProducts = allProducts.filter(product => 
+                                product.name.toLowerCase().includes(query)
+                            );
+                            displayCategories(filteredProducts);
+                        }
+                    });
+
                 } catch (error) {
                     console.error("Erro ao carregar ou processar produtos:", error);
                     loadingMessage.textContent = 'Não foi possível encontrar os tesouros. Verifique se o arquivo "products.json" está na mesma pasta do index.html.';
@@ -277,10 +305,10 @@
                 const discount = originalPrice > currentPrice ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
 
                 return `
-                    <div class="product-card flex-shrink-0 w-64 rounded-lg flex flex-col">
+                    <div class="product-card flex-shrink-0 w-56 sm:w-64 rounded-lg flex flex-col">
                         <div class="relative overflow-hidden group product-image-container">
                             <div class="shine-effect"></div>
-                            <img class="w-full h-48 object-cover" src="${product.imageUrl}" alt="${product.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x400/161b22/c9d1d9?text=Imagem+Indispon%C3%ADvel';">
+                            <img class="w-full h-44 sm:h-48 object-cover" src="${product.imageUrl}" alt="${product.name}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x400/161b22/c9d1d9?text=Imagem+Indispon%C3%ADvel';">
                             ${discount > 0 ? `<div class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">${discount}% OFF</div>` : ''}
                         </div>
                         <div class="p-4 flex-grow flex flex-col">
@@ -289,7 +317,7 @@
                             </div>
                             <div class="mt-auto pt-2">
                                 <div class="mb-2">
-                                    <span class="text-2xl font-bold text-white">R$${product.price}</span>
+                                    <span class="text-xl sm:text-2xl font-bold text-white">R$${product.price}</span>
                                     ${originalPrice > currentPrice ? `<span class="ml-2 text-sm text-gray-500 line-through">R$${product.originalPrice}</span>` : ''}
                                 </div>
                                 <div class="flex items-center space-x-2 text-xs text-gray-400 mb-4 h-5">
@@ -306,12 +334,21 @@
 
             function displayCategories(products) {
                 if (!sectionsContainer) return;
+
+                // Limpa o container antes de adicionar novos itens
+                sectionsContainer.innerHTML = ''; 
+
+                // Adiciona uma mensagem se nenhum produto for encontrado
+                if (products.length === 0) {
+                    sectionsContainer.innerHTML = `<p class="text-center text-gray-400">Nenhum produto encontrado para sua busca.</p>`;
+                    return;
+                }
+
                 const groupedByCategory = products.reduce((acc, product) => {
                     (acc[product.category] = acc[product.category] || []).push(product);
                     return acc;
                 }, {});
 
-                sectionsContainer.innerHTML = ''; 
                 const categoryOrder = ['Games', 'Acessórios', 'Informática', 'Eletrônicos', 'Eletrodomésticos', 'Ferramentas', 'Moda e Acessórios', 'Suplementos', 'Outros'];
                 
                 for (const category of categoryOrder) {
